@@ -1,0 +1,134 @@
+/* Plain, credible spreadsheet-app styling. No gradients, no demo gloss. */
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: #202124;
+  background: #f8f9fa;
+}
+
+button {
+  font: inherit;
+  padding: 4px 10px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { background: #f1f3f4; }
+button:disabled { color: #9aa0a6; cursor: default; }
+.aw-primary { background: #1a73e8; border-color: #1a73e8; color: #fff; }
+.aw-primary:hover:not(:disabled) { background: #1765c1 !important; }
+.aw-quiet { border-color: transparent; background: transparent; color: #5f6368; }
+.aw-big { padding: 10px 22px; font-size: 15px; margin-top: 16px; }
+input, select, textarea { font: inherit; padding: 4px 6px; border: 1px solid #dadce0; border-radius: 4px; }
+
+/* Layout: appbar / toolbar / my tools / main (grid + assistant) */
+.aw-root { display: flex; flex-direction: column; height: 100vh; }
+.aw-appbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 6px 12px; background: #fff; border-bottom: 1px solid #e0e0e0;
+}
+.aw-appname { font-weight: 600; font-size: 15px; color: #188038; }
+.aw-instructions { flex: 1; color: #5f6368; font-size: 12.5px; }
+.aw-toolbar {
+  display: flex; gap: 10px; padding: 5px 12px;
+  background: #fff; border-bottom: 1px solid #e0e0e0; flex-wrap: nowrap; overflow-x: auto;
+}
+.aw-tb-group { display: flex; gap: 4px; padding-right: 10px; border-right: 1px solid #eee; }
+.aw-tb-group:last-child { border-right: none; }
+.aw-popwrap { position: relative; }
+.aw-pop {
+  position: absolute; top: 30px; left: 0; z-index: 30;
+  background: #fff; border: 1px solid #dadce0; border-radius: 4px;
+  padding: 6px; display: flex; gap: 6px; box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+
+.aw-mytools {
+  display: flex; align-items: center; gap: 8px; min-height: 36px;
+  padding: 4px 12px; background: #fafbfc; border-bottom: 1px solid #e0e0e0;
+}
+.aw-mytools-label { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #5f6368; }
+.aw-mytools-empty { color: #bdc1c6; font-size: 12px; }
+.aw-tool { display: inline-flex; align-items: center; gap: 4px; }
+.aw-tool-btn { background: #e8f0fe; border-color: #c6dafc; color: #174ea6; }
+.aw-tool-btn:hover { background: #d2e3fc !important; }
+.aw-tool-input { width: 54px; padding: 2px 4px; }
+.aw-tool-confirm { font-size: 12px; display: inline-flex; gap: 6px; align-items: center; }
+
+.aw-main { display: flex; flex: 1; min-height: 0; }
+.aw-gridwrap { flex: 1; display: flex; flex-direction: column; min-width: 0; width: 75%; }
+.aw-gridwrap.aw-fullwidth { width: 100%; }
+.aw-grid { flex: 1; min-height: 0; overflow: hidden; background: #fff; }
+.aw-bold { font-weight: 700; }
+.aw-flash { background-color: #fff3cd !important; transition: background-color .3s; }
+
+.aw-tabs {
+  display: flex; gap: 2px; padding: 3px 8px 5px;
+  background: #f1f3f4; border-top: 1px solid #e0e0e0;
+}
+.aw-tab { border-radius: 0 0 4px 4px; border-top: none; padding: 3px 14px; background: #e8eaed; }
+.aw-tab-active { background: #fff; font-weight: 600; border-color: #c0c0c0; }
+.aw-tab-rename { width: 90px; }
+
+/* Assistant panel */
+.aw-assistant {
+  width: 25%; min-width: 250px; max-width: 360px;
+  border-left: 1px solid #e0e0e0; background: #fff;
+  display: flex; flex-direction: column; padding: 10px; gap: 10px; overflow-y: auto;
+}
+.aw-panel-header { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.aw-dot { width: 9px; height: 9px; border-radius: 50%; background: #d93025; display: inline-block; }
+.aw-panel-idle { color: #9aa0a6; font-size: 12.5px; }
+.aw-panel-sub { font-weight: 600; font-size: 12.5px; margin-bottom: 4px; }
+
+.aw-card {
+  border: 1px solid #dadce0; border-left: 3px solid #1a73e8; border-radius: 6px;
+  padding: 10px; display: flex; flex-direction: column; gap: 8px; background: #fff;
+}
+.aw-card-label { font-weight: 700; }
+.aw-card-text { font-size: 12.5px; color: #3c4043; }
+.aw-card-expander { text-align: left; border: none; background: none; color: #1a73e8; padding: 0; }
+.aw-card-steps { margin: 0; padding-left: 18px; font-size: 12px; color: #3c4043; }
+.aw-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.aw-card-field { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; }
+.aw-card-check { display: flex; gap: 6px; align-items: center; font-weight: 400; }
+
+.aw-promptbox { display: flex; flex-direction: column; gap: 6px; }
+.aw-promptbox textarea { resize: vertical; }
+
+.aw-inline-msg {
+  display: flex; align-items: center; gap: 8px; justify-content: space-between;
+  padding: 5px 12px; background: #fef7e0; border-bottom: 1px solid #f9e8b5;
+  color: #6a4b00; font-size: 12.5px;
+}
+.aw-inline-msg button { border: none; background: none; font-size: 14px; }
+
+/* Full-page screens (setup, consent, TLX, end) */
+.aw-screen, .aw-setup { max-width: 760px; margin: 40px auto; padding: 0 20px; }
+.aw-setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 560px; }
+.aw-setup-grid label, .aw-consent-line { display: flex; flex-direction: column; gap: 4px; }
+.aw-consent-line { flex-direction: row; align-items: center; gap: 8px; margin: 6px 0; }
+.aw-setup-table { border-collapse: collapse; }
+.aw-setup-table td, .aw-setup-table th { border: 1px solid #e0e0e0; padding: 4px 10px; }
+.aw-status { list-style: none; padding: 0; }
+.aw-status li { margin: 3px 0; }
+.aw-warn { color: #d93025; }
+
+.aw-tlx-row { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+.aw-tlx-label { width: 150px; font-weight: 600; }
+.aw-tlx-slider { display: flex; align-items: center; gap: 8px; flex: 1; }
+.aw-tlx-slider input { flex: 1; }
+.aw-tlx-slider span { font-size: 11px; color: #5f6368; width: 60px; }
+
+.aw-cal { position: fixed; inset: 0; background: #fff; }
+.aw-cal-dot {
+  position: absolute; width: 26px; height: 26px; border-radius: 50%;
+  background: #d93025; border: 3px solid #a50e0e; transform: translate(-50%, -50%);
+}
+.aw-cal-hint { position: fixed; bottom: 16px; left: 0; right: 0; text-align: center; color: #5f6368; }
+
+/* WebGazer video preview: keep it small and out of the way */
+#webgazerVideoContainer { top: auto !important; bottom: 8px !important; left: 8px !important; }
