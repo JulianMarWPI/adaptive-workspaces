@@ -1,0 +1,21 @@
+{
+  "name": "@aw/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "test": "vitest run",
+    "eval:llm": "tsx scripts/eval-llm.ts",
+    "eval:prompt": "tsx scripts/eval-prompt.ts"
+  },
+  "dependencies": {
+    "@aw/core": "*",
+    "@fastify/cors": "^10.0.0",
+    "fastify": "^5.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

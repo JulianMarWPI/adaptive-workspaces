@@ -53,7 +53,7 @@ export const COMMAND_SPECS: Record<CommandName, CommandSpec> = {
   deleteEmptyRows: {
     args: { sheet: { type: 'string' } },
     describe: () => 'Delete all empty rows',
-    keywords: ['delete', 'remove', 'empty', 'blank', 'row'],
+    keywords: ['delete', 'deletes', 'remove', 'removes', 'empty', 'blank'],
   },
   setRowStyle: {
     args: {
@@ -63,23 +63,23 @@ export const COMMAND_SPECS: Record<CommandName, CommandSpec> = {
     },
     describe: (a) =>
       `Style row ${Number(a.row) + 1}${a.bold ? ' bold' : ''}${a.fill ? `, fill ${a.fill}` : ''}`,
-    keywords: ['bold', 'style', 'header', 'fill', 'color', 'colour', 'highlight', 'row'],
+    keywords: ['bold', 'bolds', 'fill', 'color', 'colour', 'highlight', 'highlights'],
   },
   freezeRows: {
     args: { count: { type: 'number' } },
     describe: (a) => `Freeze top ${a.count} row${a.count === 1 ? '' : 's'}`,
-    keywords: ['freeze', 'frozen', 'lock', 'pin', 'header', 'row'],
+    keywords: ['freeze', 'freezes', 'frozen', 'lock', 'locks', 'pin', 'pins'],
   },
   setColumnWidth: {
     args: { column: { type: 'colref' }, width: { type: 'number' } },
     describe: (a) => `Set width of "${colName(a.column)}" to ${a.width}px`,
-    keywords: ['width', 'resize', 'column'],
+    keywords: ['width', 'widths', 'wide', 'widen', 'widens', 'resize', 'resizes'],
   },
   autoFitColumns: {
     args: { columns: { type: 'colref[]' } },
     describe: (a) =>
       `Auto-fit column widths (${(a.columns as ColRef[]).map((c) => c.header).join(', ')})`,
-    keywords: ['fit', 'auto', 'width', 'resize', 'column'],
+    keywords: ['fit', 'fits', 'auto', 'autofit', 'width', 'widths', 'resize', 'resizes'],
   },
   setNumberFormat: {
     args: {
@@ -87,7 +87,7 @@ export const COMMAND_SPECS: Record<CommandName, CommandSpec> = {
       format: { type: { enum: ['currency', 'percent', 'date', 'integer'] } },
     },
     describe: (a) => `Format "${colName(a.column)}" as ${a.format}`,
-    keywords: ['format', 'currency', 'percent', 'date', 'integer', 'number', 'column'],
+    keywords: ['currency', 'percent', 'percentage', 'date', 'dates', 'integer', 'integers'],
   },
   setAlignment: {
     args: {
@@ -95,13 +95,13 @@ export const COMMAND_SPECS: Record<CommandName, CommandSpec> = {
       align: { type: { enum: ['left', 'center', 'right'] } },
     },
     describe: (a) => `Align "${colName(a.column)}" ${a.align}`,
-    keywords: ['align', 'left', 'right', 'center', 'centre', 'column'],
+    keywords: ['align', 'aligns', 'aligned', 'alignment', 'left', 'right', 'center', 'centre'],
   },
   insertTotalRow: {
     args: { columns: { type: 'colref[]' } },
     describe: (a) =>
       `Add a total row (SUM of ${(a.columns as ColRef[]).map((c) => c.header).join(', ')})`,
-    keywords: ['total', 'sum', 'row', 'add'],
+    keywords: ['total', 'totals', 'sum', 'sums', 'subtotal'],
   },
   sortBy: {
     args: {
@@ -110,12 +110,12 @@ export const COMMAND_SPECS: Record<CommandName, CommandSpec> = {
     },
     describe: (a) =>
       `Sort by "${colName(a.column)}" ${a.direction === 'desc' ? 'descending' : 'ascending'}`,
-    keywords: ['sort', 'order', 'ascending', 'descending', 'column'],
+    keywords: ['sort', 'sorts', 'sorted', 'ascending', 'descending'],
   },
   renameSheet: {
     args: { name: { type: 'string' } },
     describe: (a) => `Rename sheet to "${a.name}"`,
-    keywords: ['rename', 'sheet', 'name'],
+    keywords: ['rename', 'renames'],
   },
   setCellValue: {
     args: {
@@ -125,7 +125,7 @@ export const COMMAND_SPECS: Record<CommandName, CommandSpec> = {
     },
     describe: (a) =>
       `Set "${colName(a.column)}" row ${Number(a.row) + 1} to ${JSON.stringify(a.value)}`,
-    keywords: ['set', 'cell', 'value', 'type', 'enter'],
+    keywords: ['enter', 'enters', 'write', 'writes'],
   },
 };
 
