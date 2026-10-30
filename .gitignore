@@ -1,0 +1,12 @@
+node_modules/
+dist/
+data/sessions/*
+!data/sessions/.gitkeep
+analysis/out/
+__pycache__/
+.venv/
+*.pyc
+.env
+playwright-report/
+test-results/
+.DS_Store

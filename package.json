@@ -1,0 +1,24 @@
+{
+  "name": "adaptive-workspaces",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:server dev:web",
+    "dev:server": "npm run dev -w apps/server",
+    "dev:web": "npm run dev -w apps/web",
+    "test": "npm run test -w packages/core && npm run test -w apps/server",
+    "test:e2e": "npm run test:e2e -w apps/web",
+    "eval:llm": "npm run eval:llm -w apps/server",
+    "eval:prompt": "npm run eval:prompt -w apps/server",
+    "build": "npm run build -w apps/web"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
