@@ -114,4 +114,12 @@ Choices made during implementation that the build instructions did not fix.
   sequence (`proposal_shown … accepted … tool:* … tool_used`) plus the state
   of the shuffled sheet (Apr) after a tool run.
 - `eval:llm` / `eval:prompt` hit the real model and are run manually on the
-  study laptop (Ollama was not installed on the build machine).
+  study laptop.
+- **`think: false` is sent for reasoning models** (qwen3, deepseek-r1, …),
+  gated by model name since Ollama rejects the flag on models without a
+  thinking mode. Without it, qwen3:8b spent 10–30 s reasoning before each
+  JSON reply and 68% of eval runs hit the 30 s timeout. With it
+  (measured 2026-10-31, RTX 5070 8 GB, Ollama 0.40.13):
+  - `eval:llm` (50 runs): **100% schema-valid first try, 0% fallback,
+    1488 ms median** (targets: >95%, <5000 ms) — PASS.
+  - `eval:prompt` (25 requests): **25/25 exact-match (100%), 567 ms median**.

@@ -18,6 +18,10 @@ export interface GenerateOptions {
 
 export class OllamaError extends Error {}
 
+/** Models where we must send think:false (Ollama rejects the flag on
+ * models that do not support thinking, so it is gated by name). */
+const THINKING_MODELS = /qwen3|deepseek-r1|gpt-oss|magistral/i;
+
 /** One chat call; returns the raw response text (expected to be JSON). */
 export async function ollamaGenerate(opts: GenerateOptions): Promise<string> {
   const fetchFn = opts.fetchFn ?? (fetch as FetchLike);
@@ -32,6 +36,9 @@ export async function ollamaGenerate(opts: GenerateOptions): Promise<string> {
         model: opts.model ?? config.ollamaModel,
         stream: false,
         format: opts.schema,
+        // Reasoning models (qwen3 etc.) otherwise spend 10-30 s "thinking"
+        // before the JSON; our outputs are small labeling tasks.
+        ...(THINKING_MODELS.test(opts.model ?? config.ollamaModel) ? { think: false } : {}),
         options: { temperature: 0 },
         messages: [
           { role: 'system', content: opts.system },
