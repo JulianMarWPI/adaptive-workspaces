@@ -3,7 +3,7 @@
 
 **Team:** Julian Mariscal · Gary DeVilbiss · Joshua Joubert — Worcester Polytechnic Institute · CS 546 · Prof. Erin Solovey
 **Track:** Artifact Contribution (interactive system + study design)
-**Prototype:** `adaptive-workspaces` — local-only web app ([repo / demo link here])
+**Prototype / repo:** `adaptive-workspaces` — local-only web app · https://github.com/JulianMarWPI/adaptive-workspaces
 **Demo:** runs fully offline on one laptop; seeded click-through at `/demo`
 
 > **Fill-in before submitting:** the repo/demo link, the per-person Milestone 2 contributions
@@ -160,9 +160,10 @@ in-the-wild version as the ideal study.
 
 ## 3. Built Work (Prototype)
 
-- **Repo / files:** [link]
-- **Run it:** `npm install && ollama pull qwen3:8b && npm run dev`, then open `/demo` for a
-  seeded click-through or `/setup` for the researcher screen. Everything runs offline.
+- **Repo / files:** https://github.com/JulianMarWPI/adaptive-workspaces
+- **Run it (it's local-only by design, so the repo *is* the demo):** `npm install && ollama
+  pull qwen3:8b && npm run dev`, then open `/demo` for a seeded click-through or `/setup` for
+  the researcher screen. Everything runs offline — no cloud, no API keys.
 - **Verification:** an automated end-to-end browser test drives the full proactive loop
   (mine → LLM proposal → accept → one-click reuse on a shuffled-column sheet) against the
   live local LLM and checks the resulting sheet and event log; 77 unit tests cover the
