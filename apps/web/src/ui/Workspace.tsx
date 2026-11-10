@@ -53,7 +53,7 @@ export function Workspace() {
         <span className="aw-appname">Workbook</span>
         <span className="aw-instructions">
           {practice
-            ? 'Practice (2 min): try the toolbar — delete empty rows, bold the header, format a column.'
+            ? 'Practice (2 min): get a feel for the toolbar. Each tool acts on your selection — click a cell or drag to select, then click a tool (e.g. select the header row, then Bold row).'
             : TASK_INSTRUCTIONS}
         </span>
         {practice ? (

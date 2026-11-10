@@ -15,6 +15,7 @@ export function Toolbar() {
   const canRedo = useStore((s) => s.redoStack.length > 0);
   const sheet = useStore((s) => s.sheets[s.active]);
   const cols = useSelection((s) => s.cols);
+  const rows = useSelection((s) => s.rows);
   const [widthOpen, setWidthOpen] = useState(false);
   const [widthVal, setWidthVal] = useState('120');
 
@@ -22,7 +23,6 @@ export function Toolbar() {
 
   const headers = (sheet.data[0] ?? []).map((h) => String(h ?? ''));
   const ref = (i: number): ColRef => ({ index: i, header: headers[i] ?? `Col${i + 1}` });
-  const allRefs = headers.map((_, i) => ref(i));
 
   const needCol = (): ColRef | null => {
     if (cols.length === 0) {
@@ -37,6 +37,13 @@ export function Toolbar() {
       return null;
     }
     return cols.map(ref);
+  };
+  const needRow = (): number | null => {
+    if (rows.length === 0) {
+      useStore.setState({ toolMessage: 'Select the row first.' });
+      return null;
+    }
+    return Math.min(...rows);
   };
 
   const fmt = (format: NumberFormat) => {
@@ -55,16 +62,23 @@ export function Toolbar() {
         <button disabled={!canRedo} onClick={redo} title="Redo (Ctrl+Y)">↷ Redo</button>
       </div>
       <div className="aw-tb-group">
-        <button onClick={() => dispatch({ cmd: 'deleteEmptyRows', args: { sheet: sheet.name } }, 'manual')}
-          title="Delete all empty rows on this sheet">Delete empty rows</button>
-        <button onClick={() => dispatch({ cmd: 'setRowStyle', args: { row: 0, bold: true } }, 'manual')}
-          title="Bold the header row">Bold header</button>
+        <button onClick={() => {
+          const r = needRow();
+          if (r === null) return;
+          if (r === 0) { useStore.setState({ toolMessage: "That's the header row — pick a blank data row." }); return; }
+          const isBlank = (sheet.data[r] ?? []).every((c) => c === null || c === undefined || String(c).trim() === '');
+          if (!isBlank) { useStore.setState({ toolMessage: "That row isn't blank — select an empty row to delete." }); return; }
+          dispatch({ cmd: 'deleteRow', args: { row: r } }, 'manual');
+        }}
+          title="Select a blank row, then delete it">Delete blank row</button>
+        <button onClick={() => { const r = needRow(); if (r !== null) dispatch({ cmd: 'setRowStyle', args: { row: r, bold: true } }, 'manual'); }}
+          title="Select the header row, then bold it">Bold row</button>
         <button onClick={() => dispatch({ cmd: 'freezeRows', args: { count: sheet.frozenRows > 0 ? 0 : 1 } }, 'manual')}
-          title="Freeze / unfreeze the header row">{sheet.frozenRows > 0 ? 'Unfreeze' : 'Freeze header'}</button>
+          title="Freeze / unfreeze the top row">{sheet.frozenRows > 0 ? 'Unfreeze' : 'Freeze top row'}</button>
       </div>
       <div className="aw-tb-group">
-        <button onClick={() => dispatch({ cmd: 'autoFitColumns', args: { columns: allRefs } }, 'manual')}
-          title="Fit all column widths to their contents">Fit columns</button>
+        <button onClick={() => { const r = selRefs(); if (r) dispatch({ cmd: 'autoFitColumns', args: { columns: r } }, 'manual'); }}
+          title="Select the columns, then fit their widths">Fit columns</button>
         <div className="aw-popwrap">
           <button onClick={() => setWidthOpen(!widthOpen)} title="Set the selected column's width">Width…</button>
           {widthOpen && (

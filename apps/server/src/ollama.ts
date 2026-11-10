@@ -35,6 +35,9 @@ export async function ollamaGenerate(opts: GenerateOptions): Promise<string> {
       body: JSON.stringify({
         model: opts.model ?? config.ollamaModel,
         stream: false,
+        // Keep the model resident between calls so a mid-session proposal
+        // never pays the cold-load cost (default Ollama unload is 5 min).
+        keep_alive: '1h',
         format: opts.schema,
         // Reasoning models (qwen3 etc.) otherwise spend 10-30 s "thinking"
         // before the JSON; our outputs are small labeling tasks.
@@ -57,6 +60,24 @@ export async function ollamaGenerate(opts: GenerateOptions): Promise<string> {
     throw new OllamaError(err instanceof Error ? err.message : String(err));
   } finally {
     clearTimeout(timer);
+  }
+}
+
+/** Load the model into memory (and compile the JSON-schema grammar) so the
+ * first real proposal of a session is fast instead of a 6-30 s cold start.
+ * Fire-and-forget on server boot; errors are swallowed (Ollama may be off). */
+export async function warmOllama(fetchFn: FetchLike = fetch as FetchLike): Promise<boolean> {
+  try {
+    await ollamaGenerate({
+      system: 'Respond with JSON only.',
+      user: 'Warm up. Reply {"label":"ok"}.',
+      schema: { type: 'object', properties: { label: { type: 'string' } }, required: ['label'] },
+      fetchFn,
+      timeoutMs: 60_000,
+    });
+    return true;
+  } catch {
+    return false;
   }
 }
 

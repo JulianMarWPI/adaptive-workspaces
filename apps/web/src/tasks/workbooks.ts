@@ -108,8 +108,10 @@ export function practiceSheet(): SheetState {
 }
 
 export const TASK_INSTRUCTIONS =
-  'For each month sheet: delete empty rows · bold + freeze the header · fit columns · ' +
-  'Amount as currency · Date as date · total row under Amount and Qty';
+  'Clean every month sheet the same way. Each step: aim first (select the row, ' +
+  'column, or cells), then click the tool. Delete each blank row (select it → ' +
+  'Delete blank row) · select the header row → Bold row · Freeze top row · ' +
+  'select Amount → $ Currency · select Date → Date · select Amount+Qty → Σ Total row.';
 
 // ---------------------------------------------------------------------------
 // Counterbalancing: condition order and workbook assignment from the

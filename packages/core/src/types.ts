@@ -36,6 +36,7 @@ export type CommandSource = 'manual' | 'tool' | 'prompt';
 
 export type Command =
   | { cmd: 'deleteEmptyRows'; args: { sheet: string } }
+  | { cmd: 'deleteRow'; args: { row: number } }
   | { cmd: 'setRowStyle'; args: { row: number; bold?: boolean; fill?: string } }
   | { cmd: 'freezeRows'; args: { count: number } }
   | { cmd: 'setColumnWidth'; args: { column: ColRef; width: number } }

@@ -13,11 +13,16 @@ import { useStore, type Highlight } from '../state/store';
 
 registerAllModules();
 
-/** Current grid selection (columns), for toolbar column operations.
- * Selection is intentionally NOT logged. */
-export const useSelection = create<{ cols: number[]; setCols: (c: number[]) => void }>((set) => ({
+/** Current grid selection (rows and columns), for toolbar operations that act
+ * on what the user has aimed at. Selection is intentionally NOT logged. */
+export const useSelection = create<{
+  cols: number[];
+  rows: number[];
+  setSelection: (sel: { cols: number[]; rows: number[] }) => void;
+}>((set) => ({
   cols: [],
-  setCols: (cols) => set({ cols }),
+  rows: [],
+  setSelection: ({ cols, rows }) => set({ cols, rows }),
 }));
 
 function formatValue(v: CellValue, format?: string): string | null {
@@ -114,11 +119,15 @@ export function SheetGrid() {
         st.dispatch({ cmd: 'setColumnWidth', args: { column: { index: col, header }, width: newSize } }, 'manual');
       },
       afterSelectionEnd: (r1, c1, r2, c2) => {
-        const lo = Math.max(0, Math.min(c1, c2));
-        const hi = Math.max(c1, c2);
+        const cLo = Math.max(0, Math.min(c1, c2));
+        const cHi = Math.max(c1, c2);
         const cols: number[] = [];
-        for (let c = lo; c <= hi; c++) cols.push(c);
-        useSelection.getState().setCols(cols);
+        for (let c = cLo; c <= cHi; c++) cols.push(c);
+        const rLo = Math.max(0, Math.min(r1, r2));
+        const rHi = Math.max(r1, r2);
+        const rows: number[] = [];
+        for (let r = rLo; r <= rHi; r++) rows.push(r);
+        useSelection.getState().setSelection({ cols, rows });
       },
     });
     hotRef.current = hot;

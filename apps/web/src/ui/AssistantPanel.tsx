@@ -2,7 +2,7 @@
 // condition — the "Ask for a tool" box. Never a modal, never steals focus.
 // A small dot on the header signals a new card.
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { describeSteps } from '@aw/core';
 import { useStore } from '../state/store';
 
@@ -119,11 +119,63 @@ function PromptBox() {
   );
 }
 
+/** Distinct sheets the user has touched with a manual command in this block. */
+function sheetsWorkedThisBlock(): string[] {
+  const { logger, blockIndex } = useStore.getState();
+  if (!logger) return [];
+  const start = logger.events.findIndex(
+    (e) => e.kind === 'session' && e.event === 'block_start' && e.block === blockIndex + 1,
+  );
+  const seen: string[] = [];
+  for (const e of logger.events.slice(start === -1 ? 0 : start)) {
+    if (e.kind === 'command' && e.source === 'manual' && !e.failed && e.sheet && !seen.includes(e.sheet)) {
+      seen.push(e.sheet);
+    }
+  }
+  return seen;
+}
+
+function DemoExplainer() {
+  // gridVersion bumps on every command, so this recomputes as the user works.
+  const gridVersion = useStore((s) => s.gridVersion);
+  void gridVersion;
+  const worked = sheetsWorkedThisBlock();
+
+  let nudge: ReactNode;
+  if (worked.length === 0) {
+    nudge = <>Start with the <strong>Jan</strong> sheet — clean it with the toolbar (select, then click each tool).</>;
+  } else if (worked.length === 1) {
+    nudge = (
+      <>
+        You've cleaned <strong>{worked[0]}</strong>. Now open another month tab (e.g.{' '}
+        <strong>Feb</strong>) and clean it the same way — <strong>that second sheet is
+        what lets me spot the repeat and offer a one-click button.</strong>
+      </>
+    );
+  } else {
+    nudge = <>Two sheets done — a suggestion should appear here any moment (or after a short pause).</>;
+  }
+
+  return (
+    <div className="aw-demo-note" id="aw-demo-note">
+      <div>
+        <strong>What to watch for.</strong> Cleaning each sheet by hand means deleting
+        its blank rows one by one and then repeating the same aimed formatting steps on
+        every month. The assistant watches for that repeated formatting and offers to
+        turn it into one button — which also re-targets the columns on sheets where
+        they're in a different order. (Row deletion stays yours: it needs a human eye.)
+      </div>
+      <div className="aw-demo-nudge" id="aw-demo-nudge">{nudge}</div>
+    </div>
+  );
+}
+
 export function AssistantPanel() {
   const cond = useStore((s) => s.cond);
   const phase = useStore((s) => s.phase);
   const card = useStore((s) => s.card);
   const panelDot = useStore((s) => s.panelDot);
+  const demo = useStore((s) => s.config?.demo ?? false);
 
   // In the default condition there is no assistant panel at all.
   if (cond === 'default' && phase === 'task') return null;
@@ -135,7 +187,10 @@ export function AssistantPanel() {
         {panelDot && <span className="aw-dot" title="New suggestion" />}
       </div>
       {cond === 'proactive' && (card ? <ProposalCardView /> : (
-        <div className="aw-panel-idle">Suggestions will appear here while you work.</div>
+        <div className="aw-panel-idle">
+          Suggestions will appear here while you work.
+          {demo && <DemoExplainer />}
+        </div>
       ))}
       {cond === 'prompted' && <PromptBox />}
     </aside>

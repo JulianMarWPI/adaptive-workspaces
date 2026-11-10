@@ -82,6 +82,16 @@ input, select, textarea { font: inherit; padding: 4px 6px; border: 1px solid #da
 .aw-panel-header { font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .aw-dot { width: 9px; height: 9px; border-radius: 50%; background: #d93025; display: inline-block; }
 .aw-panel-idle { color: #9aa0a6; font-size: 12.5px; }
+.aw-demo-note {
+  margin-top: 10px; padding: 10px; border-radius: 6px;
+  background: #f1f3f4; border: 1px dashed #c6cacd;
+  color: #3c4043; font-size: 12px; line-height: 1.45;
+}
+.aw-demo-note strong { color: #1a73e8; }
+.aw-demo-nudge {
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid #d9dcdf;
+  color: #202124;
+}
 .aw-panel-sub { font-weight: 600; font-size: 12.5px; margin-bottom: 4px; }
 
 .aw-card {

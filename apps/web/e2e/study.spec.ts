@@ -11,11 +11,36 @@ async function clickCell(page: Page, row: number, col: number, modifiers: ('Shif
   await page.locator(sel).first().click({ modifiers, force: true });
 }
 
-/** The 6-step cleanup on the current sheet, via toolbar only. */
+/** Active sheet's data grid, as logged in the store. */
+async function activeSheetData(page: Page): Promise<(string | number | null)[][]> {
+  return page.evaluate(() => {
+    const st = (window as never as { __aw: { getState: () => { sheets: { data: unknown[][] }[]; active: number } } }).__aw.getState();
+    return JSON.parse(JSON.stringify(st.sheets[st.active].data)) as (string | number | null)[][];
+  });
+}
+
+/** Delete every blank data row one at a time (the manual, per-row way):
+ * select the row, click "Delete blank row". Bottom-up so indices don't shift. */
+async function deleteBlankRows(page: Page) {
+  const data = await activeSheetData(page);
+  const blanks: number[] = [];
+  data.forEach((row, i) => {
+    if (i > 0 && row.every((c) => c === null || c === undefined || String(c).trim() === '')) blanks.push(i);
+  });
+  for (const r of blanks.reverse()) {
+    await clickCell(page, r, 0);
+    await page.getByRole('button', { name: 'Delete blank row', exact: true }).click();
+  }
+}
+
+/** The cleanup on the current sheet, via toolbar only. Blank rows are removed
+ * one at a time; the remaining 5 formatting/structure steps each aim first. */
 async function cleanSheet(page: Page, amountCol: number, dateCol: number, qtyCol: number) {
-  await page.getByRole('button', { name: 'Delete empty rows' }).click();
-  await page.getByRole('button', { name: 'Bold header' }).click();
-  await page.getByRole('button', { name: 'Freeze header' }).click();
+  await deleteBlankRows(page);
+  // Bold the header row: select a cell in row 0, then bold.
+  await clickCell(page, 0, 0);
+  await page.getByRole('button', { name: 'Bold row' }).click();
+  await page.getByRole('button', { name: 'Freeze top row' }).click();
   // Format Amount as currency (select a cell in the column first)
   await clickCell(page, 2, amountCol);
   await page.getByRole('button', { name: '$ Currency' }).click();
@@ -61,9 +86,10 @@ test('proactive flow: mine, propose, accept, reuse on a shuffled sheet', async (
   const card = page.locator('#aw-card');
   await expect(card).toBeVisible({ timeout: 30_000 });
 
-  // Inspect the steps, then accept.
+  // Inspect the steps, then accept. Row deletion is NOT part of the mined
+  // tool (it can't generalize), so the tool is the 5 formatting steps.
   await card.getByRole('button', { name: /Show steps/ }).click();
-  await expect(card.locator('.aw-card-steps li')).toHaveCount(6);
+  await expect(card.locator('.aw-card-steps li')).toHaveCount(5);
   await card.getByRole('button', { name: 'Add button' }).click();
 
   // The tool is on the My tools row.
@@ -71,7 +97,9 @@ test('proactive flow: mine, propose, accept, reuse on a shuffled sheet', async (
   await expect(toolBtn).toHaveCount(1);
 
   // Sheet 4 (Apr) has SHUFFLED columns: Amount(0) Date(1) Qty(2) Customer(3).
+  // Blank rows are still removed by hand; the one-click tool does the rest.
   await page.getByRole('button', { name: 'Apr' }).click();
+  await deleteBlankRows(page);
   await toolBtn.click();
 
   // --- Assert the sheet is correct ---
@@ -114,7 +142,6 @@ test('proactive flow: mine, propose, accept, reuse on a shuffled sheet', async (
     'proposal_shown',
     'proposal_expanded',
     'accepted',
-    'tool:deleteEmptyRows',
     'tool:setRowStyle',
     'tool:freezeRows',
     'tool:setNumberFormat',
@@ -123,9 +150,15 @@ test('proactive flow: mine, propose, accept, reuse on a shuffled sheet', async (
     'tool_used',
   ]);
 
-  // Manual cleanup produced 18 manual commands before the proposal.
+  // Row deletion is manual and per-row: there are deleteRow commands, and they
+  // are never part of the tool (source "tool").
   const manualCmds = events.filter((e) => e.kind === 'command' && e.source === 'manual');
-  expect(manualCmds.length).toBe(18);
+  const manualDeletes = manualCmds.filter((e) => e.cmd === 'deleteRow');
+  expect(manualDeletes.length).toBeGreaterThan(0);
+  const toolDeletes = events.filter((e) => e.source === 'tool' && e.cmd === 'deleteRow');
+  expect(toolDeletes.length).toBe(0);
+  // Each cleaned sheet still contributes its 5 formatting commands (>= 3 sheets).
+  expect(manualCmds.filter((e) => e.cmd === 'setNumberFormat').length).toBeGreaterThanOrEqual(6);
   // AOI layout snapshots were logged (session start + card/tool changes).
   const layouts = events.filter((e) => e.kind === 'layout');
   expect(layouts.length).toBeGreaterThanOrEqual(2);

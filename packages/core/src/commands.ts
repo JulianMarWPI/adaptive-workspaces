@@ -15,6 +15,7 @@ import type {
   Command,
   CommandName,
   NumberFormat,
+  RowStyle,
   SheetState,
   SortDirection,
 } from './types.ts';
@@ -54,6 +55,11 @@ export const COMMAND_SPECS: Record<CommandName, CommandSpec> = {
     args: { sheet: { type: 'string' } },
     describe: () => 'Delete all empty rows',
     keywords: ['delete', 'deletes', 'remove', 'removes', 'empty', 'blank'],
+  },
+  deleteRow: {
+    args: { row: { type: 'number' } },
+    describe: (a) => `Delete row ${Number(a.row) + 1}`,
+    keywords: ['delete', 'deletes', 'remove', 'removes', 'row', 'rows', 'empty', 'blank'],
   },
   setRowStyle: {
     args: {
@@ -251,6 +257,17 @@ export function applyCommand(state: SheetState, command: Command): ApplyResult {
       return { next, inverse, touched: { kind: 'all' } };
     }
 
+    case 'deleteRow': {
+      const { row } = command.args;
+      if (row <= 0) throw new CommandError(`Can't delete the header row`);
+      if (row >= next.data.length) throw new CommandError(`Row ${row + 1} does not exist`);
+      next.data = next.data.filter((_, i) => i !== row);
+      next.rowStyles = remapRowRecord(next.rowStyles, (o) =>
+        o === row ? null : o > row ? o - 1 : o,
+      );
+      return { next, inverse, touched: { kind: 'all' } };
+    }
+
     case 'setRowStyle': {
       const { row, bold, fill } = command.args;
       if (row < 0 || row >= next.data.length)
@@ -313,16 +330,26 @@ export function applyCommand(state: SheetState, command: Command): ApplyResult {
       const dir = command.args.direction === 'desc' ? -1 : 1;
       const header = next.data[0];
       const body = next.data.slice(1);
+      // A total row (any =SUM(...) cell) is not data; keep it pinned at the
+      // bottom instead of sorting it into the middle of the rows.
+      const isTotalRow = (row: CellValue[]) =>
+        row.some((c) => typeof c === 'string' && c.startsWith('=SUM('));
+      const totals = body.filter(isTotalRow);
+      const rows = body.filter((r) => !isTotalRow(r));
       const key = (v: CellValue) => (v === null || v === undefined ? '' : v);
-      body.sort((a, b) => {
+      rows.sort((a, b) => {
         const x = key(a[col]);
         const y = key(b[col]);
         if (typeof x === 'number' && typeof y === 'number') return (x - y) * dir;
         return String(x).localeCompare(String(y)) * dir;
       });
-      next.data = [header, ...body];
-      // Row styles other than the header no longer track their rows; drop them.
-      next.rowStyles = next.rowStyles[0] !== undefined ? { 0: next.rowStyles[0] } : {};
+      next.data = [header, ...rows, ...totals];
+      // Sorted data rows no longer track their styles; keep only the header and
+      // re-bold the total rows at their new positions at the bottom.
+      const styles: Record<number, RowStyle> = {};
+      if (next.rowStyles[0] !== undefined) styles[0] = next.rowStyles[0];
+      for (let i = 0; i < totals.length; i++) styles[1 + rows.length + i] = { bold: true };
+      next.rowStyles = styles;
       return { next, inverse, touched: { kind: 'all' } };
     }
 

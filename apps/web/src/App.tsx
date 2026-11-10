@@ -22,7 +22,10 @@ function useDemoAutostart() {
       session: `demo${Date.now().toString(36)}`,
       pilot: true,
       demo: true,
-      K: 3,
+      // Demo only: fire after the pattern repeats on 2 sheets (Jan+Feb) so the
+      // proposal appears without cleaning a third sheet. The study default
+      // stays K=3 (config.ts / the setup screen).
+      K: 2,
       sensing: 'none',
       condOrder: ['proactive', 'prompted'],
       workbookOrder: ['A', 'B'],

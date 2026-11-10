@@ -73,6 +73,40 @@ describe('applyCommand', () => {
     expect(desc.data.map((r) => r[0])).toEqual(['Name', 'c', 'b', 'a']);
   });
 
+  it('deleteRow removes one row, remaps styles, and refuses the header', () => {
+    const s = makeSheet('S', [
+      ['H', 'N'],
+      ['a', 1],
+      ['b', 2],
+      ['c', 3],
+    ]);
+    s.rowStyles[3] = { bold: true }; // style on 'c'
+    const { next } = applyCommand(s, { cmd: 'deleteRow', args: { row: 2 } }); // remove 'b'
+    expect(next.data.map((r) => r[0])).toEqual(['H', 'a', 'c']);
+    expect(next.rowStyles[2]).toEqual({ bold: true }); // 'c' moved from 3 to 2
+    expect(() => applyCommand(s, { cmd: 'deleteRow', args: { row: 0 } })).toThrow(CommandError);
+  });
+
+  it('sortBy keeps a total row pinned at the bottom', () => {
+    const base = makeSheet('S', [
+      ['Name', 'N'],
+      ['b', 2],
+      ['a', 3],
+      ['c', 1],
+    ]);
+    const withTotal = applyCommand(base, {
+      cmd: 'insertTotalRow',
+      args: { columns: [{ index: 1, header: 'N' }] },
+    }).next;
+    const sorted = applyCommand(withTotal, {
+      cmd: 'sortBy',
+      args: { column: { index: 1, header: 'N' }, direction: 'asc' },
+    }).next;
+    expect(sorted.data.map((r) => r[0])).toEqual(['Name', 'c', 'b', 'a', 'Total']);
+    expect(String(sorted.data[sorted.data.length - 1][1])).toMatch(/^=SUM\(/);
+    expect(sorted.rowStyles[sorted.data.length - 1]).toEqual({ bold: true });
+  });
+
   it('autoFitColumns sets deterministic widths within bounds', () => {
     const s = rawSheet();
     const { next } = applyCommand(s, {
@@ -89,6 +123,7 @@ describe('undo/redo for every command', () => {
   const base = rawSheet();
   const commands: Command[] = [
     { cmd: 'deleteEmptyRows', args: { sheet: 'Jan' } },
+    { cmd: 'deleteRow', args: { row: 1 } },
     { cmd: 'setRowStyle', args: { row: 0, bold: true, fill: '#eee' } },
     { cmd: 'freezeRows', args: { count: 1 } },
     { cmd: 'setColumnWidth', args: { column: { index: 1, header: 'Customer' }, width: 140 } },

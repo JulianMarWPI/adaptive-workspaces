@@ -94,6 +94,11 @@ export function normalize(events: LogEvent[]): Episode[] {
       continue;
     }
     if (e.kind !== 'command' || !e.cmd) continue;
+    // Per-row deletions are data-dependent (blank rows sit at different
+    // indices on every sheet), so they can't generalize into a reusable tool
+    // step. Exclude them from episodes: the assistant never proposes
+    // automating row deletion, which stays a manual, human-judged action.
+    if (e.cmd === 'deleteRow') continue;
     const command = { cmd: e.cmd, args: e.args } as Command;
     current.push({
       token: tokenize(command, e.ctx),
